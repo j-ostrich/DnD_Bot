@@ -7,6 +7,12 @@ if (!DISCORD_TOKEN) {
 
 const bot = new Discord.Client();
 
+function diceRoll(diceStr) {
+  const [times, dice] = diceStr[1].split("d").map(d => parseInt(d));
+  const rolls = Array(times).fill(null).map(_ => Math.floor(dice*Math.random() + 1));
+  return `Rolls: ${rolls.sort().join(" ")}\nSum: ${rolls.reduce((acc, n) => acc + n, 0)}`;
+}
+
 bot.on('message', (message) => {
   if (message.content[0] === '!') {
     const messageContent = message.content.slice(1).toLowerCase();
@@ -18,10 +24,7 @@ bot.on('message', (message) => {
       message.channel.sendMessage('*!handbook*');
       message.channel.sendMessage('*!roll (insert dice and rolls here)*');
     } else if (splitContent[0] === 'roll') {
-      const [times, dice] = splitContent(" ")[1].split("d").map(d => parseInt(d));
-      const rolls = Array(times).fill(null).map(_ => Math.floor(dice*Math.random() + 1));
-      message.channel.sendMessage(`Rolls: ${rolls.sort().join(" ")}
-      Sum: ${rolls.reduce((acc, n) => acc + n, 0)}`);
+      message.channel.sendMessage(diceRoll(splitContent[1]));
     } else {
       message.channel.sendMessage(`*${messageContent}* is not a valid command. Use !help to view commands.`);
     }
