@@ -1,29 +1,31 @@
 const Discord = require('discord.js');
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
+
+if (!DISCORD_TOKEN) {
+  throw 'DISCORD_TOKEN environment variable is not set.'
+}
+
 const bot = new Discord.Client();
 
 bot.on('message', (message) => {
-
-  function DiceRoll(string) {
-    let times = parseInt(string.slice(0,1))
-    let dice = parseInt(string.slice(2))
-    for (let i = 0; i < times; i++) {
-      message.channel.sendMessage(Math.floor(Math.random() * dice) + 1)
-    }
-  }
-
-  if (message.content[0] == '!') {
-    message.content = message.content.slice(1)
-    if (message.content == 'handbook') {
+  if (message.content[0] === '!') {
+    const messageContent = message.content.slice(1).toLowerCase();
+    const splitContent = messageContent.split(" ");
+    if (messageContent === 'handbook') {
       message.channel.sendMessage('https://drive.google.com/file/d/0B3E_3y6MPuYjQ3cteEtLQm53a1U/view');
-    } else if (message.content == 'help') {
-      message.channel.sendMessage('DnD Bot responds to the following commands: ')
-      message.channel.sendMessage('*!handbook*')
-      message.channel.sendMessage('*!roll (insert dice and rolls here)*')
-    } else if (message.content.split(" ")[0] == 'roll') {
-      let dice = message.content.split(" ")[1]
-      DiceRoll(dice)
+    } else if (messageContent === 'help') {
+      message.channel.sendMessage('DnD Bot responds to the following commands: ');
+      message.channel.sendMessage('*!handbook*');
+      message.channel.sendMessage('*!roll (insert dice and rolls here)*');
+    } else if (splitContent[0] === 'roll') {
+      const [times, dice] = splitContent(" ")[1].split("d").map(d => parseInt(d));
+      const rolls = Array(times).fill(null).map(_ => Math.floor(dice*Math.random() + 1));
+      message.channel.sendMessage(`Rolls: ${rolls.sort().join(" ")}
+      Sum: ${rolls.reduce((acc, n) => acc + n, 0)}`);
+    } else {
+      message.channel.sendMessage(`*${messageContent}* is not a valid command. Use !help to view commands.`);
     }
   }
 });
 
-bot.login('TOKEN GOES HERE')
+bot.login(DISCORD_TOKEN);
